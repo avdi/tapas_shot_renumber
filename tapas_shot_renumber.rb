@@ -16,8 +16,9 @@ end
 
 def in_body(next_shot_number) 
   return ->(line) {
-    return [line, in_fenced_code_block(next_shot_number)] if line =~ /^```/
-    if line.sub!(SHOT_NUMBER_PATTERN, "shot(#{next_shot_number})")
+    if line =~ /^```/
+      [line, in_fenced_code_block(next_shot_number)]
+    elsif line.sub!(SHOT_NUMBER_PATTERN, "shot(#{next_shot_number})")
       [line, in_body(next_shot_number + 1)]
     else
       [line, in_body(next_shot_number)]
