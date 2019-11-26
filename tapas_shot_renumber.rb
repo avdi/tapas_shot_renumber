@@ -27,12 +27,10 @@ end
 
 ARGF
   .each_line
-  .each_with_object({thing_to_do: do_out_of_fence(1)})
-  .map { |line, state|
-    line, thing_to_do = state[:thing_to_do].call(line)
-    state[:thing_to_do] = thing_to_do
-    line
+  .reduce(do_out_of_fence(1)) { |thing_to_do, line|
+    line, thing_to_do = thing_to_do.call(line)
+    puts line
+    thing_to_do
   }
-  .each(&method(:puts))
 
 
