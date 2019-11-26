@@ -32,7 +32,11 @@ end
 ARGF
   .each_line
   .reduce(in_body(1)) { |thing_to_do, line|
-    line, thing_to_do = thing_to_do.call(line)
+    begin 
+      line, thing_to_do = thing_to_do.call(line)
+    rescue => e 
+      warn "WTF dude: " + line + e.message
+    end
     puts line
     thing_to_do
   }
