@@ -3,25 +3,28 @@ SHOT_NUMBER_PATTERN = /
 shot\(\d*\)  # e.g. 'shot(23)' or 'shot()'
 (?=\s.*-->)  # must be followed by '-->'
 /x
+ENTER_CODE_BLOCK_PATTERN = /^```/
+EXIT_CODE_BLOCK_PATTERN  = /^```/
 
-def in_fenced_code_block(next_shot_number)
+def in_body(next_shot_number) 
   return ->(line) {
-    if (line =~ /^```/)
-      [line, in_body(next_shot_number)]
+    if line.sub!(SHOT_NUMBER_PATTERN, "shot(#{next_shot_number})")
+      [line, in_body(next_shot_number + 1)]
+    elsif line =~ ENTER_CODE_BLOCK_PATTERN
+      [line, in_fenced_code_block(next_shot_number)]
     else
-      [line, in_fenced_code_block(next_shot_number)] 
+      [line, in_body(next_shot_number)]
     end
   }
 end
 
-def in_body(next_shot_number) 
+
+def in_fenced_code_block(next_shot_number)
   return ->(line) {
-    if line =~ /^```/
-      [line, in_fenced_code_block(next_shot_number)]
-    elsif line.sub!(SHOT_NUMBER_PATTERN, "shot(#{next_shot_number})")
-      [line, in_body(next_shot_number + 1)]
-    else
+    if (line =~ EXIT_CODE_BLOCK_PATTERN)
       [line, in_body(next_shot_number)]
+    else
+      [line, in_fenced_code_block(next_shot_number)] 
     end
   }
 end
